@@ -1,24 +1,22 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { toast } from "react-toastify";
 import css from "./Searchbar.module.css";
 
 export default function Searchbar({ onSubmit }) {
-  const [qwery, setQwery] = useState("");
+  const [value, setValue] = useState("");
 
   const handleChange = (e) => {
-    setQwery(e.target.value.toLowerCase());
+    setValue(e.target.value.toLowerCase());
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    if (qwery.trim() === "") {
+    if (value.trim() === "") {
       toast.error("Введите что нибудь");
       return;
     }
-
-    onSubmit(qwery);
-    setQwery("");
+    onSubmit(value);
+    setValue("");
   };
 
   return (
@@ -31,7 +29,7 @@ export default function Searchbar({ onSubmit }) {
         <input
           className={css.SearchFormInput}
           type="text"
-          value={qwery}
+          value={value}
           onChange={handleChange}
           autoComplete="off"
           autoFocus

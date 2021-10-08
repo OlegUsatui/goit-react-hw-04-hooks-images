@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Loader from "react-loader-spinner";
@@ -11,31 +11,36 @@ import Searchbar from "./Searchbar/Searchbar";
 import getImages from "../utils/request";
 
 export default function App() {
-  const [searchImage, setSearchImage] = useState(null);
   const [largeImage, setLargeImage] = useState(null);
+  const [searchImage, setSearchImage] = useState(null);
   const [gallery, setGallery] = useState([]);
   const [page, setPage] = useState(1);
   const [reqStatus, setReqStatus] = useState("idle");
 
   useEffect(() => {
-    if (!searchImage) {
+    if (searchImage === null) {
       return;
     }
 
     setReqStatus("pending");
+    getImages(searchImage, page).then(({ hits }) => {
+      if (hits.length !== 0) {
+        setGallery((prev) => [...prev, ...hits]);
+        setReqStatus("resolved");
 
-    getImages(searchImage, page).then((images) => {
-      setGallery(images);
-      setReqStatus("resolved");
+        scrollToDown();
+      } else {
+        setReqStatus("rejected");
+        toast.error("Нету таких изображений");
+      }
     });
-  }, [page, searchImage]);
+  }, [searchImage, page]);
 
-  const handleFormSubmit = (searchImage) => {
-    setSearchImage(searchImage);
-  };
-
-  const openModal = (url) => {
-    setLargeImage(url);
+  const scrollToDown = () => {
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: "smooth",
+    });
   };
 
   const closeModal = (e) => {
@@ -50,14 +55,9 @@ export default function App() {
 
   return (
     <div className={css.App}>
-      <Searchbar onSubmit={handleFormSubmit} />
-      {reqStatus === "idle" && (
-        <div>
-          <p>Введите название картинки</p>
-        </div>
-      )}
+      <Searchbar onSubmit={setSearchImage} />
       {reqStatus === "resolved" && (
-        <ImageGallery gallery={gallery} openModal={openModal} page={page} />
+        <ImageGallery gallery={gallery} openModal={setLargeImage} page={page} />
       )}
       {reqStatus === "resolved" && (
         <Button text="Load more" onLoadMoreClick={onLoadMoreClick} />

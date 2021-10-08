@@ -12,7 +12,7 @@ const getImages = (images, page) => {
       }
       Promise.reject(new Error("Нету таких фотографий"));
     })
-    .then((data) => data.hits);
+    .catch((error) => console.log(error));
 };
 
 export default getImages;
